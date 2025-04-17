@@ -8,13 +8,13 @@ async function crearNotificacion(req, res) {
             return res.status(400).json({ message: 'Faltan datos requeridos' });
         }
 
-        const subastaExiste = await SubastaModel.existeSubasta(subasta_id);
+        const subastaExiste = await Notificacion.existeSubasta(subasta_id);
         if (!subastaExiste) {
             return res.status(400).json({ message: 'La subasta no existe' });
         }
 
         if (oferta_id) {
-            const ofertaExiste = await OfertaModel.existeOferta(oferta_id);
+            const ofertaExiste = await Notificacion.existeOferta(oferta_id);
             if (!ofertaExiste) {
                 return res.status(400).json({ message: 'La oferta no existe' });
             }
