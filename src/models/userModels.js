@@ -33,4 +33,12 @@ const getUserByEmail = async (email) => {
   }
 };
 
-module.exports = { createUser, getUserByEmail };
+const aumentarSaldoUsuario = async (usuario_id, monto) => {
+  await pool.query(`
+    UPDATE usuarios
+    SET saldo = saldo + $1
+    WHERE usuario_id = $2
+  `, [monto, usuario_id]);
+};
+
+module.exports = { createUser, getUserByEmail, aumentarSaldoUsuario };
