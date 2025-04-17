@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 
-// ✅ Crear nueva oferta
+// Crear nueva oferta
 async function crearOferta(subasta_id, usuario_id, cantidad) {
   const { rows: ofertasAltas } = await pool.query(
     `SELECT * FROM ofertas 
@@ -29,7 +29,7 @@ async function crearOferta(subasta_id, usuario_id, cantidad) {
   return rows[0];
 }
 
-// ✅ Obtener todas las ofertas de una subasta
+// Obtener todas las ofertas de una subasta
 async function obtenerOfertasPorSubasta(subasta_id) {
   const { rows } = await pool.query(
     `SELECT o.*, u.nombre_usuario 
@@ -43,7 +43,7 @@ async function obtenerOfertasPorSubasta(subasta_id) {
   return rows;
 }
 
-// ✅ Obtener todas las ofertas
+// Obtener todas las ofertas
 async function getAllOfertas() {
   const result = await pool.query(`
     SELECT o.*, u.nombre_usuario
@@ -54,7 +54,7 @@ async function getAllOfertas() {
   return result.rows;
 }
 
-// ✅ Eliminar oferta activa de un usuario
+// Eliminar oferta activa de un usuario
 async function eliminarOferta(oferta_id, usuario_id) {
   const { rowCount } = await pool.query(
     `DELETE FROM ofertas 
@@ -64,7 +64,7 @@ async function eliminarOferta(oferta_id, usuario_id) {
   return rowCount > 0;
 }
 
-// ✅ Cambiar estado de una oferta
+// Cambiar estado de una oferta
 async function actualizarEstadoOferta(oferta_id, nuevoEstado) {
   const { rowCount } = await pool.query(
     `UPDATE ofertas SET estado = $1 WHERE oferta_id = $2`,
@@ -73,7 +73,7 @@ async function actualizarEstadoOferta(oferta_id, nuevoEstado) {
   return rowCount > 0;
 }
 
-// ✅ Obtener la oferta más alta
+// Obtener la oferta más alta
 async function obtenerOfertaMasAlta(subasta_id) {
   const { rows } = await pool.query(
     `SELECT o.*, u.nombre_usuario 
@@ -86,7 +86,7 @@ async function obtenerOfertaMasAlta(subasta_id) {
   return rows[0];
 }
 
-// ✅ Historial de ofertas por usuario
+// Historial de ofertas por usuario
 async function obtenerOfertasPorUsuario(usuario_id) {
   const { rows } = await pool.query(
     `SELECT o.*, s.titulo AS titulo_subasta 

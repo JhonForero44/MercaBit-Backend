@@ -5,13 +5,13 @@ const { aumentarSaldoUsuario } = require('../models/userModels');
 
 const finalizarSubastas = async () => {
   try {
-    console.log('⏰ Verificando subastas vencidas...');
+    console.log('Verificando subastas vencidas...');
     const { rows: subastas } = await pool.query(`
       SELECT * FROM subastas
       WHERE estado = 'activa' AND fecha_finalizacion <= NOW()
     `);
 
-    console.log(`📦 Subastas vencidas encontradas: ${subastas.length}`);
+    console.log(`Subastas vencidas encontradas: ${subastas.length}`);
 
     for (const subasta of subastas) {
       const { rows: [ofertaMasAlta] } = await pool.query(`
@@ -72,7 +72,7 @@ const finalizarSubastas = async () => {
     }
 
   } catch (err) {
-    console.error('❌ Error finalizando subastas:', err);
+    console.error('Error finalizando subastas:', err);
   }
 };
 
