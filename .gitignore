@@ -3,3 +3,4 @@ node_modules/
 
 # Archivos de entorno
 .env
+config.js
