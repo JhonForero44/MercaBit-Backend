@@ -2,10 +2,12 @@
 const express = require('express');
 const app = express();
 require('dotenv').config(); 
+require('./src/cronJobs/finalizarSubastas');
 const authRoutes = require('./src/routes/auth');
 const subastaRouter = require('./src/routes/subasta');
 const ofertaRouter = require('./src/routes/oferta');
 const notificacionRoutes = require('./src/routes/notificacion');
+const transaccionesRoutes = require('./src/routes/transacciones'); // Asegúrate de que la ruta sea correcta
 
 const PORT = process.env.PORT || 3000;
 
@@ -22,6 +24,7 @@ app.use('/auth', authRoutes);
 app.use('/api/subastas', subastaRouter);
 app.use('/api/ofertas', ofertaRouter);
 app.use('/api/notificaciones', notificacionRoutes);
+app.use('/api/transacciones', transaccionesRoutes); // Asegúrate de que la ruta sea correcta
 
 // Iniciar el servidor
 app.listen(PORT, () => {
