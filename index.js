@@ -1,7 +1,11 @@
 // index.js
 const express = require('express');
 const app = express();
-require('dotenv').config(); // Para leer las variables del .env
+require('dotenv').config(); 
+const authRoutes = require('./src/routes/auth');
+const subastaRouter = require('./src/routes/subasta');
+const ofertaRouter = require('./src/routes/oferta');
+const notificacionRoutes = require('./src/routes/notificacion');
 
 const PORT = process.env.PORT || 3000;
 
@@ -12,6 +16,12 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('Bienvenido a Mercabit API');
 });
+
+// Registro de rutas
+app.use('/auth', authRoutes); 
+app.use('/api/subastas', subastaRouter);
+app.use('/api/ofertas', ofertaRouter);
+app.use('/api/notificaciones', notificacionRoutes);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
