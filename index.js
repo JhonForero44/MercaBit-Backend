@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 require('dotenv').config(); 
 require('./src/cronJobs/finalizarSubastas');
+const testMailRouter = require('./src/routes/testMailRouter');
 const authRoutes = require('./src/routes/auth');
 const subastaRouter = require('./src/routes/subasta');
 const ofertaRouter = require('./src/routes/oferta');
@@ -25,6 +26,7 @@ app.use('/api/subastas', subastaRouter);
 app.use('/api/ofertas', ofertaRouter);
 app.use('/api/notificaciones', notificacionRoutes);
 app.use('/api/transacciones', transaccionesRoutes); // Asegúrate de que la ruta sea correcta
+app.use('/api', testMailRouter);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
