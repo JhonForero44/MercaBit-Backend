@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 require('dotenv').config(); 
-require('./src/cronJobs/finalizarSubastas');
+require('./src/cronJobs/cronJobs');
 const testMailRouter = require('./src/routes/testMailRouter');
 const authRoutes = require('./src/routes/auth');
 const subastaRouter = require('./src/routes/subasta');
