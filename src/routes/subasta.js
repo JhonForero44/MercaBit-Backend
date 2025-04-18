@@ -14,7 +14,10 @@ router.get('/:id', subastaController.obtenerSubastaPorId);
 // Ruta para actualizar una subasta
 router.put('/:id', subastaController.actualizarSubasta);
 
-// Ruta para eliminar una subasta
-router.delete('/:id', subastaController.eliminarSubasta);
+// Ruta para cancelara una subasta
+router.put('/cancelar/:id', subastaController.cancelar_Subasta);
+
+// Ruta oata finalizar una subasta
+router.post('/:id/finalizar', subastaController.finalizar_Subasta);
 
 module.exports = router;
