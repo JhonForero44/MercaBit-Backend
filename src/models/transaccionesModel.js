@@ -35,7 +35,17 @@ const obtenerVentasPorUsuario = async (usuario_id) => {
   return rows;
 };
 
+// Función para registrar el pago en la transacción
+async function registrarPago(transaccion_id, fecha_pago) {
+  const { rows } = await pool.query(
+    `UPDATE transacciones SET fecha_pago = $1 WHERE transaccion_id = $2 RETURNING *`,
+    [fecha_pago, transaccion_id]
+  );
+  return rows[0];  // Devolvemos la transacción actualizada con la fecha de pago
+}
+
 module.exports = {
   obtenerComprasPorUsuario,
   obtenerVentasPorUsuario,
+  registrarPago
 };

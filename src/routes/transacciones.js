@@ -9,4 +9,7 @@ router.get('/compras/:usuario_id', transaccionesController.obtenerComprasPorUsua
 // Historial de ventas del usuario
 router.get('/ventas/:usuario_id', transaccionesController.obtenerVentasPorUsuario);
 
+// Ruta para registrar la compra de una subasta
+router.post('/transacciones', transaccionesController.registrarTransaccionCompra);
+
 module.exports = router;
