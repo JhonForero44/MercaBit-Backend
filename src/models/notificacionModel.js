@@ -1,15 +1,21 @@
 const pool = require('../config/db');
 
-// Crear una nueva notificación
-async function crearNotificacion(usuario_id, subasta_id, oferta_id, mensaje, tipo) {
-    const { rows } = await pool.query(
-        `INSERT INTO notificaciones (usuario_id, subasta_id, oferta_id, mensaje, tipo)
-         VALUES ($1, $2, $3, $4, $5)
-         RETURNING *`,
-        [usuario_id, subasta_id, oferta_id || null, mensaje, tipo]
-    );
-    return rows[0];
-}
+// Función para crear una notificación
+const crearNotificacion = async (usuario_id, subasta_id, mensaje, tipo) => {
+    const query = `
+      INSERT INTO notificaciones (usuario_id, subasta_id, mensaje, tipo)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+    const values = [usuario_id, subasta_id, mensaje, tipo];
+  
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0];  // Devuelve la notificación creada
+    } catch (error) {
+      throw new Error('Error al crear notificación: ' + error.message);
+    }
+  };
 
 // Verificar si existe una subasta
 async function existeSubasta(subasta_id) {
@@ -66,6 +72,31 @@ async function marcarTodasComoLeidas(usuario_id) {
     return result.rows;
 }
 
+// Funcion para notificar a las personas horas antes de la subasta
+async function notificarSubastasProximas() {
+    // Consultamos las subastas que finalizan en las próximas 24 horas
+    const { rows: subastasProximas } = await pool.query(
+      `SELECT * FROM subastas 
+       WHERE fecha_finalizacion BETWEEN CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP + INTERVAL '1 day' 
+       AND estado = 'activa'`
+    );
+  
+    for (let subasta of subastasProximas) {
+      // Enviar notificación a todos los participantes de la subasta
+      const { rows: usuariosSubasta } = await pool.query(
+        `SELECT DISTINCT usuario_id FROM ofertas WHERE subasta_id = $1`,
+        [subasta.subasta_id]
+      );
+  
+      for (let usuario of usuariosSubasta) {
+        await pool.query(
+          `INSERT INTO notificaciones (usuario_id, subasta_id, mensaje, tipo) 
+           VALUES ($1, $2, $3, 'subasta_proxima')`,
+          [usuario.usuario_id, subasta.subasta_id, `La subasta "${subasta.titulo}" está por finalizar en 24 horas.`]
+        );
+      }
+    }
+  }
 
 module.exports = {
     crearNotificacion,
@@ -73,5 +104,6 @@ module.exports = {
     marcarComoLeida,
     marcarTodasComoLeidas,
     existeOferta,
-    existeSubasta
+    existeSubasta,
+    notificarSubastasProximas
 };
