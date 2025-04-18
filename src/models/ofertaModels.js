@@ -2,6 +2,7 @@ const pool = require('../config/db');
 
 // Crear nueva oferta
 async function crearOferta(subasta_id, usuario_id, cantidad) {
+  // Obtener la oferta más alta actual
   const { rows: ofertasAltas } = await pool.query(
     `SELECT * FROM ofertas 
      WHERE subasta_id = $1 AND estado = 'activa'
@@ -13,21 +14,47 @@ async function crearOferta(subasta_id, usuario_id, cantidad) {
   const cantidadMaxima = ofertaAnterior?.cantidad || 0;
   const es_mas_alta = parseFloat(cantidad) > parseFloat(cantidadMaxima);
 
+  // Si es la nueva más alta, actualizar las demás y notificar
   if (es_mas_alta) {
+    // 1. Desmarcar ofertas anteriores como la más alta
     await pool.query(
       `UPDATE ofertas SET es_mas_alta = false WHERE subasta_id = $1`,
       [subasta_id]
     );
+
+    // 2. Insertar nueva oferta como más alta
+    const { rows } = await pool.query(
+      `INSERT INTO ofertas (subasta_id, usuario_id, cantidad, es_mas_alta)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [subasta_id, usuario_id, cantidad, es_mas_alta]
+    );
+
+    const nuevaOferta = rows[0];
+
+    // 3. Notificar al usuario anterior si existía
+    if (ofertaAnterior) {
+      const mensaje = `Tu oferta de $${ofertaAnterior.cantidad} ha sido superada en la subasta #${subasta_id}.`;
+
+      await pool.query(
+        `INSERT INTO notificaciones (usuario_id, subasta_id, oferta_id, mensaje, tipo)
+         VALUES ($1, $2, $3, $4, 'oferta_superada')`,
+        [ofertaAnterior.usuario_id, subasta_id, ofertaAnterior.oferta_id, mensaje]
+      );
+    }
+
+    return nuevaOferta;
   }
 
+  // Si no es más alta, igual se guarda la oferta
   const { rows } = await pool.query(
     `INSERT INTO ofertas (subasta_id, usuario_id, cantidad, es_mas_alta)
-     VALUES ($1, $2, $3, $4) RETURNING *`,
-    [subasta_id, usuario_id, cantidad, es_mas_alta]
+     VALUES ($1, $2, $3, false) RETURNING *`,
+    [subasta_id, usuario_id, cantidad]
   );
 
   return rows[0];
 }
+
 
 // Obtener todas las ofertas de una subasta
 async function obtenerOfertasPorSubasta(subasta_id) {

@@ -10,7 +10,6 @@ const {
 
 const { crearNotificacion } = require('../models/notificacionModel');
 
-// Crear una nueva oferta
 async function crearNuevaOferta(req, res) {
   const { subasta_id, usuario_id, cantidad } = req.body;
 
@@ -19,28 +18,26 @@ async function crearNuevaOferta(req, res) {
   }
 
   try {
-    const nuevaOferta = await crearOferta(subasta_id, usuario_id, cantidad);
+    // 1. Obtener la oferta más alta actual para validar antes de crear la nueva
+    const ofertaActual = await obtenerOfertaMasAlta(subasta_id);
+    const montoActual = parseFloat(ofertaActual?.cantidad || 0);
+    const montoNuevo = parseFloat(cantidad);
+
+    if (montoNuevo <= montoActual) {
+      return res.status(400).json({
+        message: `La oferta debe ser mayor a la actual de $${montoActual}`,
+      });
+    }
+
+    // 2. Crear la nueva oferta porque pasó la validación
+    const nuevaOferta = await crearOferta(subasta_id, usuario_id, montoNuevo);
     res.status(201).json({ message: 'Oferta creada exitosamente', oferta: nuevaOferta });
 
-    // Notificar al usuario anterior si fue superado
-    if (nuevaOferta.es_mas_alta) {
-      const ofertasPrevias = await obtenerOfertasPorSubasta(subasta_id);
-
-      if (ofertasPrevias.length > 1) {
-        const ofertaAnterior = ofertasPrevias[1]; // La segunda oferta más reciente
-        await crearNotificacion({
-          usuario_id: ofertaAnterior.usuario_id,
-          subasta_id,
-          oferta_id: ofertaAnterior.oferta_id,
-          mensaje: `Tu oferta fue superada en la subasta #${subasta_id}`,
-          tipo: 'oferta_superada'
-        });
-      }
-    }
   } catch (error) {
     res.status(500).json({ message: 'Error al crear oferta', error: error.message });
   }
 }
+
 
 // Obtener todas las ofertas de una subasta
 async function obtenerOfertasDeSubasta(req, res) {
