@@ -9,15 +9,18 @@ const subastaRouter = require('./src/routes/subasta');
 const ofertaRouter = require('./src/routes/oferta');
 const notificacionRoutes = require('./src/routes/notificacion');
 const transaccionesRoutes = require('./src/routes/transacciones'); // Asegúrate de que la ruta sea correcta
+const cors = require('cors');
 
 const PORT = process.env.PORT || 3000;
 
 // Middleware para que el servidor entienda JSON
 app.use(express.json());
+// Habilita CORS para permitir solicitudes desde el frontend
+app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-  res.send('Bienvenido a Mercabit API');
+  res.json({ mensaje: 'Bienvenido al Backend Mercabit API' });
 });
 
 // Registro de rutas
