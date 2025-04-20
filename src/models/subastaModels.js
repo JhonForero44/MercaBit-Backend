@@ -29,6 +29,21 @@ const getAllSubastas = async () => {
   }
 };
 
+//Funcion para obterne todas las subastas ACTIVAS
+const getSubastasActivas = async () => {
+  const query = `
+    SELECT * FROM subastas
+    WHERE estado = 'activa' AND fecha_finalizacion > now()
+  `;
+
+  try {
+    const result = await pool.query(query);
+    return result.rows;
+  } catch (error) {
+    throw new Error('Error al obtener subastas activas: ' + error.message);
+  }
+};
+
 // Función para obtener una subasta por su ID
 const getSubastaById = async (subasta_id) => {
   const query = 'SELECT * FROM subastas WHERE subasta_id = $1';
@@ -195,4 +210,4 @@ async function cerrarSubastaComoVendida(subasta_id, usuario_ganador_id) {
   return rows[0];  // Devolvemos la subasta actualizada
 }
 
-module.exports = { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getAuctionsBySeller, tieneOfertas, finalizarSubasta, obtenerSubastaPorId, registrarTransaccion, cerrarSubastaComoVendida};
+module.exports = { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getAuctionsBySeller, tieneOfertas, finalizarSubasta, obtenerSubastaPorId, registrarTransaccion, cerrarSubastaComoVendida, getSubastasActivas};
