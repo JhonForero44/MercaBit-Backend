@@ -11,7 +11,8 @@ const {
 const { crearNotificacion } = require('../models/notificacionModel');
 
 async function crearNuevaOferta(req, res) {
-  const { subasta_id, usuario_id, cantidad } = req.body;
+  const { subasta_id, cantidad } = req.body;
+  const usuario_id = req.user.usuario_id;
 
   if (!subasta_id || !usuario_id || !cantidad) {
     return res.status(400).json({ message: 'Faltan datos requeridos' });
@@ -31,6 +32,19 @@ async function crearNuevaOferta(req, res) {
 
     // 2. Crear la nueva oferta porque pasó la validación
     const nuevaOferta = await crearOferta(subasta_id, usuario_id, montoNuevo);
+
+    // 3. Crear notificación al vendedor de la subasta
+    const subasta = await obtenerSubastaPorId(subasta_id);
+    const vendedor_id = subasta.vendedor_id;
+    const mensajeVendedor = `Se ha realizado una nueva oferta de $${montoNuevo} en tu subasta: ${subasta.titulo}`;
+    await crearNotificacion(vendedor_id, subasta_id, null, mensajeVendedor, 'nueva_oferta');
+
+    // 4. Notificar al usuario cuya oferta fue superada, si existe
+    if (ofertaActual.usuario_id && ofertaActual.usuario_id !== usuario_id) {
+      const mensajeOfertaSuperada = `Tu oferta de $${montoActual} en la subasta "${subasta.titulo}" ha sido superada por una nueva oferta de $${montoNuevo}.`;
+      await crearNotificacion(ofertaActual.usuario_id, subasta_id, ofertaActual.oferta_id, mensajeOfertaSuperada, 'oferta_superada');
+    }
+
     res.status(201).json({ message: 'Oferta creada exitosamente', oferta: nuevaOferta });
 
   } catch (error) {
@@ -38,6 +52,12 @@ async function crearNuevaOferta(req, res) {
   }
 }
 
+// Obtener subastas por ID
+async function obtenerSubastaPorId(subasta_id) {
+  // Obtén la subasta usando el subasta_id
+  const subasta = await Subasta.findByPk(subasta_id);
+  return subasta;
+}
 
 // Obtener todas las ofertas de una subasta
 async function obtenerOfertasDeSubasta(req, res) {
@@ -62,7 +82,7 @@ async function obtenerTodasLasOfertas(req, res) {
 // Eliminar oferta (si está activa y es del usuario)
 async function eliminarOfertaActiva(req, res) {
   const { oferta_id } = req.params;
-  const { usuario_id } = req.body;
+  const usuario_id = req.user.usuario_id;
 
   try {
     const eliminada = await eliminarOferta(oferta_id, usuario_id);
