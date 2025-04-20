@@ -2,6 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const transaccionesController = require('../controllers/transaccionesController');
+const authenticateToken = require('../middlewares/authMiddleware')
+
+//Todas las rutas estan proteguidas
+router.use(authenticateToken);
 
 // Historial de compras del usuario
 router.get('/compras/:usuario_id', transaccionesController.obtenerComprasPorUsuario);

@@ -2,6 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const ofertaController = require('../controllers/ofertasController');
+const authenticateToken = require('../middlewares/authMiddleware')
+
+//Todas las rutas estan proteguidas
+router.use(authenticateToken);
 
 // Crea una nueva oferta.
 router.post('/', ofertaController.crearNuevaOferta);
