@@ -1,10 +1,11 @@
-const { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta } = require('../models/subastaModels');
+const { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getSubastasActivas } = require('../models/subastaModels');
 
 // Crear una nueva subasta
 async function crearSubasta(req, res){
-  const { vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion } = req.body;
+  const vendedor_id = req.user.usuario_id;
+  const { titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion } = req.body;
 
-  if (!vendedor_id || !titulo || !imagen_producto || !descripcion || !categoria_id || !precio_inicial || !duracion) {
+  if ( !titulo || !imagen_producto || !descripcion || !categoria_id || !precio_inicial || !duracion) {
     return res.status(400).json({ message: 'Faltan datos requeridos' });
   }
 
@@ -25,6 +26,16 @@ async function obtenerSubastas(req, res){
     res.status(500).json({ message: 'Error al obtener subastas', error: error.message });
   }
 };
+
+// Obtener las subas Activas
+const getSubastasActivasController = async (req, res) => {
+  try {
+    const subastas = await getSubastasActivas()
+    res.json(subastas)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+}
 
 // Obtener una subasta por ID
 async function obtenerSubastaPorId(req, res) {
@@ -56,8 +67,9 @@ async function obtenerSubastasPorVendedor(req, res){
 // Actualizar una subasta
 async function actualizarSubasta(req, res){
   const subasta_id = req.params.id;
+  const vendedor_id = req.user.usuario_id;  // Extraemos el vendedor_id del token JWT
+
   const {
-    vendedor_id,
     titulo,
     imagen_producto,
     descripcion,
@@ -67,18 +79,21 @@ async function actualizarSubasta(req, res){
     duracion
   } = req.body;
 
-  if (!vendedor_id) {
-    return res.status(400).json({ message: 'Falta el ID del vendedor' });
+  if (!titulo || !imagen_producto || !descripcion || !categoria_id || !precio_inicial || !duracion) {
+    return res.status(400).json({ message: 'Faltan datos requeridos' });
   }
 
   try {
-    const updatedSubasta = await updateSubasta(subasta_id, vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion);
-
-    if (!updatedSubasta) {
-      return res.status(403).json({
-        message: 'No puedes modificar esta subasta (puede no ser tuya, no estar activa o ya tener ofertas)'
-      });
+    const subasta = await getSubastaById(subasta_id);
+    if (!subasta) {
+      return res.status(404).json({ message: 'Subasta no encontrada' });
     }
+
+    if (subasta.vendedor_id !== vendedor_id) {
+      return res.status(403).json({ message: 'No tienes permiso para actualizar esta subasta' });
+    }
+
+    const updatedSubasta = await updateSubasta(subasta_id, vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion);
 
     res.json({ message: 'Subasta actualizada exitosamente', subasta: updatedSubasta });
   } catch (error) {
@@ -86,17 +101,18 @@ async function actualizarSubasta(req, res){
   }
 };
 
+
 //Cancelar una subasta
 async function cancelar_Subasta (req, res) {
   const subasta_id = req.params.id;
-  const usuario_id = req.usuario_id; // asumiendo que usás auth middleware
+  const vendedor_id = req.user.usuario_id;  // Extraemos el vendedor_id del token JWT
 
   try {
     const subasta = await getSubastaById(subasta_id);
     if (!subasta) return res.status(404).json({ message: 'Subasta no encontrada' });
 
-    if (subasta.vendedor_id !== parseInt(usuario_id)) {
-      return res.status(403).json({ message: 'No autorizado para cancelar esta subasta' });
+    if (subasta.vendedor_id !== vendedor_id) {
+      return res.status(403).json({ message: 'No tienes permiso para cancelar esta subasta' });
     }
 
     if (subasta.estado !== 'activa') {
@@ -116,16 +132,21 @@ async function cancelar_Subasta (req, res) {
   }
 };
 
+
 // Función para finalizar la subasta
 async function finalizar_Subasta(req, res) {
   const subasta_id = req.params.id;
+  const vendedor_id = req.user.usuario_id;  // Extraemos el vendedor_id del token JWT
 
   try {
-    // Obtener la subasta por ID
     const subasta = await getSubastaById(subasta_id);
 
     if (!subasta) {
       return res.status(404).json({ message: 'Subasta no encontrada' });
+    }
+
+    if (subasta.vendedor_id !== vendedor_id) {
+      return res.status(403).json({ message: 'No tienes permiso para finalizar esta subasta' });
     }
 
     if (subasta.estado === 'finalizada') {
@@ -135,13 +156,13 @@ async function finalizar_Subasta(req, res) {
     // Cambiar el estado de la subasta a finalizada
     const updatedSubasta = await updateSubasta(subasta_id, subasta.titulo, subasta.imagen_producto, subasta.descripcion, subasta.categoria_id, subasta.precio_inicial, subasta.precio_compra_inmediata, subasta.duracion);
 
-    // Si hay un ganador, crear la notificación
+    // Enviar notificación al ganador, si existe
     if (subasta.usuario_ganador_id) {
       const mensaje = `¡Felicidades! Has ganado la subasta "${subasta.titulo}".`;
       await crearNotificacion(subasta.usuario_ganador_id, subasta.subasta_id, mensaje, 'ganador_subasta');
     }
 
-    // También puedes agregar una notificación al vendedor si lo deseas
+    // Notificar al vendedor
     const mensajeVendedor = `La subasta "${subasta.titulo}" ha sido finalizada.`;
     await crearNotificacion(subasta.vendedor_id, subasta.subasta_id, mensajeVendedor, 'vendedor_subasta');
 
@@ -158,5 +179,6 @@ module.exports = {
   obtenerSubastas,
   obtenerSubastaPorId, 
   obtenerSubastasPorVendedor, 
-  actualizarSubasta
+  actualizarSubasta,
+  getSubastasActivasController
 };
