@@ -2,7 +2,7 @@ const { createUser, getUserByEmail } = require('../models/userModels');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const enviarCorreo = require('../utils/mailer');
-const pool = require('../config/db'); 
+const pool = require('../config/db');
 const nodemailer = require('nodemailer');
 
 // Registrar un nuevo usuario
@@ -57,6 +57,11 @@ const loginUser = async (req, res) => {
     const user = await getUserByEmail(email);
     if (!user) {
       return res.status(400).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Verificacion de Correo confirmado 
+    if (user.estado_cuenta !== 'activo') {
+      return res.status(401).json({ message: 'Debes verificar tu correo antes de iniciar sesión.' });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
@@ -132,7 +137,7 @@ const requestPasswordReset = async (req, res) => {
       <p>Hemos recibido una solicitud para recuperar tu contraseña. Haz clic en el siguiente enlace para restablecerla:</p>
       <a href="${resetLink}">${resetLink}</a>
       <p>Este enlace expirará en 1 hora.</p>
-    `);  
+    `);
 
     res.status(200).json({
       message: 'Correo de recuperación enviado, por favor revisa tu bandeja de entrada.',

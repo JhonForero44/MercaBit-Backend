@@ -4,7 +4,7 @@ const transaccionesModel = require('../models/transaccionesModel');
 const { cerrarSubastaComoVendida, registrarTransaccion, obtenerSubastaPorId } = require('../models/subastaModels');
 
 const obtenerComprasPorUsuario = async (req, res) => {
-  const { usuario_id } = req.params;
+  const { usuario_id } = req.user; 
 
   try {
     const compras = await transaccionesModel.obtenerComprasPorUsuario(usuario_id);
@@ -16,7 +16,7 @@ const obtenerComprasPorUsuario = async (req, res) => {
 };
 
 const obtenerVentasPorUsuario = async (req, res) => {
-  const { usuario_id } = req.params;
+  const { usuario_id } = req.user;
 
   try {
     const ventas = await transaccionesModel.obtenerVentasPorUsuario(usuario_id);
@@ -29,12 +29,14 @@ const obtenerVentasPorUsuario = async (req, res) => {
 
 // Ruta para registrar una transacción
 const registrarTransaccionCompra = async (req, res) => {  // <-- Aquí agregué 'async' a la función
-  const { subasta_id, comprador_id, monto_total } = req.body;
+  const { subasta_id, monto_total } = req.body;
 
-  if (!subasta_id || !comprador_id || !monto_total) {
+  if (!subasta_id || !monto_total) {
     return res.status(400).json({ message: 'Faltan datos requeridos' });
   }
 
+  const { usuario_id } = req.user;
+  
   try {
     // 1. Verificar si la subasta ya está vendida
     const subasta = await obtenerSubastaPorId(subasta_id);
@@ -46,10 +48,10 @@ const registrarTransaccionCompra = async (req, res) => {  // <-- Aquí agregué 
     }
 
     // 2. Registrar la transacción en la tabla transacciones
-    const transaccion = await registrarTransaccion(subasta_id, comprador_id, monto_total);
+    const transaccion = await registrarTransaccion(subasta_id, usuario_id, monto_total);
 
     // 3. Marcar la subasta como vendida y asignar al usuario ganador
-    await cerrarSubastaComoVendida(subasta_id, comprador_id);
+    await cerrarSubastaComoVendida(subasta_id, usuario_id);
 
     // 4. Registrar el pago en la transacción
     await transaccionesModel.registrarPago(transaccion.transaccion_id, new Date());
