@@ -46,14 +46,25 @@ const getSubastasActivas = async () => {
 
 // Función para obtener una subasta por su ID
 const getSubastaById = async (subasta_id) => {
-  const query = 'SELECT * FROM subastas WHERE subasta_id = $1';
-  const values = [subasta_id];
+  const client = await pool.connect();
 
   try {
-    const result = await pool.query(query, values);
+    await client.query('BEGIN');
+
+    // 1. Aumentar número de vistas
+    await client.query('UPDATE subastas SET numero_vistas = numero_vistas + 1 WHERE subasta_id = $1', [subasta_id]);
+
+    // 2. Obtener la subasta actualizada
+    const result = await client.query('SELECT * FROM subastas WHERE subasta_id = $1', [subasta_id]);
+
+    await client.query('COMMIT');
+
     return result.rows[0];
   } catch (error) {
-    throw new Error('Error al obtener subasta por ID: ' + error.message);
+    await client.query('ROLLBACK');
+    throw new Error('Error al obtener y actualizar vistas de subasta: ' + error.message);
+  } finally {
+    client.release();
   }
 };
 
@@ -210,4 +221,18 @@ async function cerrarSubastaComoVendida(subasta_id, usuario_ganador_id) {
   return rows[0];  // Devolvemos la subasta actualizada
 }
 
-module.exports = { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getAuctionsBySeller, tieneOfertas, finalizarSubasta, obtenerSubastaPorId, registrarTransaccion, cerrarSubastaComoVendida, getSubastasActivas};
+// Actualizar valores de subasta luego de la oferta
+async function actualizarSubastaDespuesDeOferta(subasta_id, nuevoPrecio) {
+  const query = `
+    UPDATE subastas
+    SET 
+      precio_actual = $1,
+      numero_ofertas = numero_ofertas + 1
+    WHERE subasta_id = $2
+    RETURNING *;
+  `;
+  const { rows } = await pool.query(query, [nuevoPrecio, subasta_id]);
+  return rows[0];
+}
+
+module.exports = { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getAuctionsBySeller, tieneOfertas, finalizarSubasta, obtenerSubastaPorId, registrarTransaccion, cerrarSubastaComoVendida, getSubastasActivas, actualizarSubastaDespuesDeOferta};
