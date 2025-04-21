@@ -88,7 +88,8 @@ const getUserProfile = async (req, res) => {
       nombre_usuario: user.nombre_usuario,
       email: user.email,
       foto_usuario: user.foto_usuario,
-      saldo: user.saldo
+      saldo: user.saldo,
+      cedula: user.cedula
     });
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener perfil', error: error.message });
