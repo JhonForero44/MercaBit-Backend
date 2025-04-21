@@ -37,12 +37,12 @@ const getSubastasActivasController = async (req, res) => {
   }
 }
 
-// Obtener una subasta por ID
+// Obtener una subasta por ID / incrementar vistas
 async function obtenerSubastaPorId(req, res) {
   const subasta_id = req.params.id;
 
   try {
-    const subasta = await getSubastaById(subasta_id);
+    const subasta = await getSubastaById(subasta_id);  // Este ya actualiza vistas
     if (!subasta) {
       return res.status(404).json({ message: 'Subasta no encontrada' });
     }
