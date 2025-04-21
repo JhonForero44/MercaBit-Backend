@@ -4,15 +4,23 @@ async function crearNotificacion(req, res) {
     try {
         const { usuario_id, subasta_id, oferta_id, mensaje, tipo } = req.body;
 
+        // Validación para verificar si los datos requeridos están presentes
         if (!usuario_id || !subasta_id || !mensaje || !tipo) {
             return res.status(400).json({ message: 'Faltan datos requeridos' });
         }
 
+        // Si mensaje está vacío o nulo, asignar un mensaje predeterminado
+        if (!mensaje.trim()) {
+            return res.status(400).json({ message: 'El mensaje no puede estar vacío' });
+        }
+
+        // Verificar si la subasta existe
         const subastaExiste = await Notificacion.existeSubasta(subasta_id);
         if (!subastaExiste) {
             return res.status(400).json({ message: 'La subasta no existe' });
         }
 
+        // Si hay oferta, verificar que exista
         if (oferta_id) {
             const ofertaExiste = await Notificacion.existeOferta(oferta_id);
             if (!ofertaExiste) {
@@ -20,6 +28,7 @@ async function crearNotificacion(req, res) {
             }
         }
 
+        // Crear la notificación
         const notificacion = await Notificacion.crearNotificacion(
             usuario_id,
             subasta_id,
@@ -28,11 +37,13 @@ async function crearNotificacion(req, res) {
             tipo
         );
 
+        // Responder con la notificación creada
         res.json(notificacion);
     } catch (error) {
         res.status(500).json({ message: 'Error al crear notificación', error: error.message });
     }
 }
+
 
 async function getNotificacionesPorUsuario(req, res) {
     try {
