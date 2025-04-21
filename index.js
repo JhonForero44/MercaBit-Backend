@@ -10,6 +10,7 @@ const ofertaRouter = require('./src/routes/oferta');
 const notificacionRoutes = require('./src/routes/notificacion');
 const transaccionesRoutes = require('./src/routes/transacciones'); // Asegúrate de que la ruta sea correcta
 const cors = require('cors');
+const categoriaRoutes = require('./src/routes/categoria');
 
 const PORT = process.env.PORT || 3000;
 
@@ -30,6 +31,7 @@ app.use('/api/ofertas', ofertaRouter);
 app.use('/api/notificaciones', notificacionRoutes);
 app.use('/api/transacciones', transaccionesRoutes); // Asegúrate de que la ruta sea correcta
 app.use('/api', testMailRouter);
+app.use('/api/categorias', categoriaRoutes); 
 
 // Iniciar el servidor
 app.listen(PORT, () => {
