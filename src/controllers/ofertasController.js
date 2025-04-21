@@ -10,9 +10,19 @@ const {
 
 const { crearNotificacion } = require('../models/notificacionModel');
 
+const { actualizarSubastaDespuesDeOferta, obtenerSubastaPorId } = require('../models/subastaModels');
+
 async function crearNuevaOferta(req, res) {
   const { subasta_id, cantidad } = req.body;
-  const usuario_id = req.user.usuario_id;
+  const usuario_id = req.user.id;
+
+/*
+  console.log('Cuerpo de la solicitud:', req.body);  // Imprimir el cuerpo de la solicitud
+  console.log('Usuario:', req.user);  // Imprimir el usuario
+  console.log('subasta_id:', subasta_id);
+  console.log('cantidad:', cantidad);
+  console.log('usuario_id:', usuario_id);
+*/
 
   if (!subasta_id || !usuario_id || !cantidad) {
     return res.status(400).json({ message: 'Faltan datos requeridos' });
@@ -33,6 +43,9 @@ async function crearNuevaOferta(req, res) {
     // 2. Crear la nueva oferta porque pasó la validación
     const nuevaOferta = await crearOferta(subasta_id, usuario_id, montoNuevo);
 
+    // Actualizar la subasta
+    await actualizarSubastaDespuesDeOferta(subasta_id, montoNuevo);
+
     // 3. Crear notificación al vendedor de la subasta
     const subasta = await obtenerSubastaPorId(subasta_id);
     const vendedor_id = subasta.vendedor_id;
@@ -48,15 +61,9 @@ async function crearNuevaOferta(req, res) {
     res.status(201).json({ message: 'Oferta creada exitosamente', oferta: nuevaOferta });
 
   } catch (error) {
+    console.error('Error al crear oferta:', error); 
     res.status(500).json({ message: 'Error al crear oferta', error: error.message });
   }
-}
-
-// Obtener subastas por ID
-async function obtenerSubastaPorId(subasta_id) {
-  // Obtén la subasta usando el subasta_id
-  const subasta = await Subasta.findByPk(subasta_id);
-  return subasta;
 }
 
 // Obtener todas las ofertas de una subasta
@@ -82,7 +89,7 @@ async function obtenerTodasLasOfertas(req, res) {
 // Eliminar oferta (si está activa y es del usuario)
 async function eliminarOfertaActiva(req, res) {
   const { oferta_id } = req.params;
-  const usuario_id = req.user.usuario_id;
+  const usuario_id = req.user.id;
 
   try {
     const eliminada = await eliminarOferta(oferta_id, usuario_id);
