@@ -1,4 +1,4 @@
-const { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getSubastasActivas } = require('../models/subastaModels');
+const { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getSubastasActivas, getAuctionsBySeller } = require('../models/subastaModels');
 
 // Crear una nueva subasta
 async function crearSubasta(req, res){
@@ -54,7 +54,7 @@ async function obtenerSubastaPorId(req, res) {
 
 //Obtener subasta por vendedor
 async function obtenerSubastasPorVendedor(req, res){
-  const vendedor_id = req.params.vendedorId;
+  const vendedor_id = req.params.id;
 
   try {
     const subastas = await getAuctionsBySeller(vendedor_id);

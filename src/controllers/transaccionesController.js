@@ -4,7 +4,8 @@ const transaccionesModel = require('../models/transaccionesModel');
 const { cerrarSubastaComoVendida, registrarTransaccion, obtenerSubastaPorId } = require('../models/subastaModels');
 
 const obtenerComprasPorUsuario = async (req, res) => {
-  const { usuario_id } = req.user; 
+  console.log('Usuario autenticado:', req.user);
+  const usuario_id  = req.user.id; 
 
   try {
     const compras = await transaccionesModel.obtenerComprasPorUsuario(usuario_id);
@@ -16,10 +17,10 @@ const obtenerComprasPorUsuario = async (req, res) => {
 };
 
 const obtenerVentasPorUsuario = async (req, res) => {
-  const { usuario_id } = req.user;
+  const  usuario_id  = req.user.id;
 
   try {
-    const ventas = await transaccionesModel.obtenerVentasPorUsuario(usuario_id);
+    const ventas = await transaccionesModel.obtenerVentasUsuario(usuario_id);
     res.json(ventas);
   } catch (err) {
     console.error('Error al obtener ventas:', err);
