@@ -18,6 +18,9 @@ router.get('/', subastaController.obtenerSubastas);
 // Ruta para obtener una subasta por ID
 router.get('/:id', subastaController.obtenerSubastaPorId);
 
+// Ruta para obtener subastas por vendedor
+router.get('/vendedor/:id', subastaController.obtenerSubastasPorVendedor);
+
 // Ruta para actualizar una subasta
 router.put('/:id', subastaController.actualizarSubasta);
 
