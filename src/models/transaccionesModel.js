@@ -18,7 +18,7 @@ const obtenerComprasPorUsuario = async (usuario_id) => {
   return rows;
 };
 
-const obtenerVentasPorUsuario = async (usuario_id) => {
+const obtenerVentasUsuario = async (usuario_id) => {
   const { rows } = await pool.query(`
     SELECT 
       t.transaccion_id,
@@ -46,6 +46,6 @@ async function registrarPago(transaccion_id, fecha_pago) {
 
 module.exports = {
   obtenerComprasPorUsuario,
-  obtenerVentasPorUsuario,
+  obtenerVentasUsuario,
   registrarPago
 };
