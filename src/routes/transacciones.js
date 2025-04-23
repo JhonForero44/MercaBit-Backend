@@ -8,10 +8,10 @@ const authenticateToken = require('../middlewares/authMiddleware')
 router.use(authenticateToken);
 
 // Historial de compras del usuario
-router.get('/compras/:usuario_id', transaccionesController.obtenerComprasPorUsuario);
+router.get('/compras', transaccionesController.obtenerComprasPorUsuario);
 
 // Historial de ventas del usuario
-router.get('/ventas/:usuario_id', transaccionesController.obtenerVentasPorUsuario);
+router.get('/ventas', transaccionesController.obtenerVentasPorUsuario);
 
 // Ruta para registrar la compra de una subasta
 router.post('/transacciones', transaccionesController.registrarTransaccionCompra);
