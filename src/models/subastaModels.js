@@ -34,6 +34,7 @@ const getSubastasActivas = async () => {
   const query = `
     SELECT * FROM subastas
     WHERE estado = 'activa' AND fecha_finalizacion > now()
+    ORDER BY fecha_finalizacion ASC
   `;
 
   try {
