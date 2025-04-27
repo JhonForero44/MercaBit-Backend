@@ -133,7 +133,9 @@ async function obtenerOfertaMasAltaDeSubasta(req, res) {
 // Historial de ofertas de un usuario
 async function historialOfertasPorUsuario(req, res) {
   try {
-    const ofertas = await obtenerOfertasPorUsuario(req.params.usuario_id);
+    console.log('Usuario autenticado:', req.user);
+    const usuario_id = req.user.id;
+    const ofertas = await obtenerOfertasPorUsuario(usuario_id);
     res.json(ofertas);
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener historial de ofertas', error: error.message });

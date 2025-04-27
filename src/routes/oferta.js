@@ -17,7 +17,7 @@ router.get('/', ofertaController.obtenerTodasLasOfertas);
 router.get('/subasta/:subasta_id', ofertaController.obtenerOfertasDeSubasta);
 
 // Obtiene el historial de ofertas de un usuario específico.
-router.get('/usuario/:usuario_id', ofertaController.historialOfertasPorUsuario);
+router.get('/usuario/historial', ofertaController.historialOfertasPorUsuario);
 
 // Obtiene la oferta más alta de una subasta específica.
 router.get('/subasta/:subasta_id/mas-alta', ofertaController.obtenerOfertaMasAltaDeSubasta);
