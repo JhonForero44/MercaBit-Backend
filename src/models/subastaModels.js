@@ -1,13 +1,13 @@
 const pool = require('../config/db');
 
 // Función para crear una nueva subasta
-const createSubasta = async (vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion) => {
+const createSubasta = async (vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion, precio_actual) => {
   const query = `
-    INSERT INTO subastas (vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    RETURNING subasta_id, vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion, fecha_inicio, fecha_finalizacion, estado
+    INSERT INTO subastas (vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion, precio_actual)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    RETURNING subasta_id, vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion, fecha_inicio, fecha_finalizacion, estado, precio_actual
   `;
-  const values = [vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion];
+  const values = [vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion, precio_actual];
 
   try {
     const result = await pool.query(query, values);

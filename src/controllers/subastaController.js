@@ -1,21 +1,21 @@
 const { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getSubastasActivas, getAuctionsBySeller } = require('../models/subastaModels');
 
 // Crear una nueva subasta
-async function crearSubasta(req, res){
-  const vendedor_id = req.user.usuario_id;
-  const { titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion } = req.body;
+async function crearSubasta(req, res) {
+  const vendedor_id = req.user.id;
+  const { titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion, precio_actual } = req.body;
 
-  if ( !titulo || !imagen_producto || !descripcion || !categoria_id || !precio_inicial || !duracion) {
+  if (!titulo || !imagen_producto || !descripcion || !categoria_id || !precio_inicial || !duracion || !precio_actual) {
     return res.status(400).json({ message: 'Faltan datos requeridos' });
   }
 
   try {
-    const newSubasta = await createSubasta(vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion);
+    const newSubasta = await createSubasta(vendedor_id, titulo, imagen_producto, descripcion, categoria_id, precio_inicial, precio_compra_inmediata, duracion, precio_actual);
     res.status(201).json({ message: 'Subasta creada exitosamente', subasta: newSubasta });
   } catch (error) {
     res.status(500).json({ message: 'Error al crear subasta', error: error.message });
   }
-};
+}
 
 // Obtener todas las subastas
 async function obtenerSubastas(req, res){
@@ -54,7 +54,7 @@ async function obtenerSubastaPorId(req, res) {
 
 //Obtener subasta por vendedor
 async function obtenerSubastasPorVendedor(req, res){
-  const vendedor_id = req.params.id;
+  const vendedor_id = req.user.id;
 
   try {
     const subastas = await getAuctionsBySeller(vendedor_id);
