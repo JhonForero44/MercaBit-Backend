@@ -53,10 +53,10 @@ async function crearNuevaOferta(req, res) {
     await crearNotificacion(vendedor_id, subasta_id, null, mensajeVendedor, 'nueva_oferta');
 
     // 4. Notificar al usuario cuya oferta fue superada, si existe
-    if (ofertaActual.usuario_id && ofertaActual.usuario_id !== usuario_id) {
+    if (ofertaActual && ofertaActual.usuario_id && ofertaActual.usuario_id !== usuario_id) {
       const mensajeOfertaSuperada = `Tu oferta de $${montoActual} en la subasta "${subasta.titulo}" ha sido superada por una nueva oferta de $${montoNuevo}.`;
       await crearNotificacion(ofertaActual.usuario_id, subasta_id, ofertaActual.oferta_id, mensajeOfertaSuperada, 'oferta_superada');
-    }
+    }    
 
     res.status(201).json({ message: 'Oferta creada exitosamente', oferta: nuevaOferta });
 
