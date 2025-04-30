@@ -2,6 +2,12 @@
 const express = require('express');
 const router = express.Router();
 const NotificacionesController = require('../controllers/notificacionesController');
+const authenticateToken = require('../middlewares/authMiddleware')
+
+//Todas las rutas estan proteguidas
+router.use(authenticateToken);
+
+router.get('/notificaciones', NotificacionesController.obtenerNotificaciones);
 
 // Crear una nueva notificación
 router.post('/', NotificacionesController.crearNotificacion);
