@@ -1,4 +1,5 @@
 const { createSubasta, getAllSubastas, getSubastaById, updateSubasta, cancelarSubasta, getSubastasActivas, getAuctionsBySeller } = require('../models/subastaModels');
+const { notificarSubastaGanada, notificarSubastaFinalizada } = require('./notificacionesController');
 
 // Crear una nueva subasta
 async function crearSubasta(req, res) {
@@ -158,19 +159,17 @@ async function finalizar_Subasta(req, res) {
 
     // Enviar notificación al ganador, si existe
     if (subasta.usuario_ganador_id) {
-      const mensaje = `¡Felicidades! Has ganado la subasta "${subasta.titulo}".`;
-      await crearNotificacion(subasta.usuario_ganador_id, subasta.subasta_id, mensaje, 'ganador_subasta');
+      await notificarSubastaGanada(subasta.usuario_ganador_id, subasta.subasta_id, subasta.titulo);
     }
 
     // Notificar al vendedor
-    const mensajeVendedor = `La subasta "${subasta.titulo}" ha sido finalizada.`;
-    await crearNotificacion(subasta.vendedor_id, subasta.subasta_id, mensajeVendedor, 'vendedor_subasta');
+    await notificarSubastaFinalizada(subasta.vendedor_id, subasta.subasta_id, subasta.titulo);
 
     res.json({ message: 'Subasta finalizada exitosamente', subasta: updatedSubasta });
   } catch (error) {
     res.status(500).json({ message: 'Error al finalizar subasta', error: error.message });
   }
-};
+}
 
 module.exports = {
   finalizar_Subasta,
