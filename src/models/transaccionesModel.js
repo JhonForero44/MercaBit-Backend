@@ -7,10 +7,16 @@ const obtenerComprasPorUsuario = async (usuario_id) => {
       t.transaccion_id,
       t.subasta_id,
       s.titulo,
+      s.descripcion,
+      s.imagen_producto,
+      c.nombre AS categoria,
+      u.nombre_usuario AS nombre_vendedor,
       t.monto_total,
       t.fecha_pago
     FROM transacciones t
     JOIN subastas s ON t.subasta_id = s.subasta_id
+    JOIN usuarios u ON s.vendedor_id = u.usuario_id
+    JOIN categorias c ON s.categoria_id = c.categoria_id 
     WHERE t.comprador_id = $1
     ORDER BY t.fecha_pago DESC
   `, [usuario_id]);

@@ -75,9 +75,27 @@ async function marcarTodasComoLeidas(req, res) {
     }
 }
 
+// Endpoint para obtener las notificaciones de un usuario
+async function obtenerNotificaciones(req, res) {
+    try {
+      const usuario_id = req.user.usuario_id; // Viene del token JWT
+  
+      const notificaciones = await Notificacion.getNotificacionesPorUsuario(usuario_id);
+  
+      if (notificaciones.length === 0) {
+        return res.status(404).json({ message: 'No hay notificaciones para este usuario.' });
+      }
+  
+      res.json({ notificaciones });
+    } catch (error) {
+      res.status(500).json({ message: 'Error al obtener las notificaciones', error: error.message });
+    }
+  }
+
 module.exports = {
     crearNotificacion,
     getNotificacionesPorUsuario,
     marcarComoLeida,
     marcarTodasComoLeidas,
+    obtenerNotificaciones
 };
