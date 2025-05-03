@@ -13,7 +13,7 @@ router.get('/notificaciones', NotificacionesController.obtenerNotificaciones);
 router.post('/', NotificacionesController.crearNotificacion);
 
 // Obtener todas las notificaciones de un usuario
-router.get('/usuario/:usuario_id', NotificacionesController.getNotificacionesPorUsuario);
+router.get('/usuario', NotificacionesController.getNotificacionesPorUsuario);
 
 // Marcar una notificación como leída
 router.patch('/:id/leida', NotificacionesController.marcarComoLeida);

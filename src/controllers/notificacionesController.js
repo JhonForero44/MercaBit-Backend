@@ -47,7 +47,7 @@ async function crearNotificacion(req, res) {
 
 async function getNotificacionesPorUsuario(req, res) {
     try {
-        const { usuario_id } = req.params;
+        const usuario_id = req.user.id;
         const notificaciones = await Notificacion.getNotificacionesPorUsuario(usuario_id);
         res.json(notificaciones);
     } catch (error) {
