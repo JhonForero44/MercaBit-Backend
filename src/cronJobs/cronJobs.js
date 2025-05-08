@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 const cron = require('node-cron');
-const { aumentarSaldoUsuario } = require('../models/userModels');
+const { aumentarSaldoUsuario, disminuirSaldoUsuario } = require('../models/userModels');
 const { notificarSubastasProximas } = require('../models/notificacionModel');
 
 const finalizarSubastas = async () => {
@@ -69,6 +69,9 @@ const finalizarSubastas = async () => {
           VALUES ($1, $2, $3, 'ganador_subasta')
         `, [usuarioGanadorId, subasta.subasta_id, `¡Ganaste la subasta '${subasta.titulo}'!`]);
       }
+
+      // Disminuir saldo del comprador
+      await disminuirSaldoUsuario(usuarioGanadorId, ofertaMasAlta.cantidad);
     }
 
   } catch (err) {
