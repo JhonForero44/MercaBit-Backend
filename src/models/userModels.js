@@ -40,6 +40,14 @@ const aumentarSaldoUsuario = async (usuario_id, monto) => {
   `, [monto, usuario_id]);
 };
 
+const disminuirSaldoUsuario = async (usuario_id, monto) => {
+  await pool.query(`
+    UPDATE usuarios
+    SET saldo = saldo - $1
+    WHERE usuario_id = $2
+  `, [monto, usuario_id]);
+};
+
 // Actualizar la contraseña
 const updateUserPassword = async (email, password) => {
   const result = await pool.query(
@@ -49,4 +57,4 @@ const updateUserPassword = async (email, password) => {
   return result.rows[0]; // Regresa el usuario actualizado
 };
 
-module.exports = { createUser, getUserByEmail, aumentarSaldoUsuario, updateUserPassword };
+module.exports = { createUser, getUserByEmail, aumentarSaldoUsuario, disminuirSaldoUsuario, updateUserPassword };
