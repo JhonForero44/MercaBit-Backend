@@ -3,17 +3,18 @@ const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 
 const createUser = async (cedula, nombre_usuario, email, password) => {
-  const hashedPassword = await bcrypt.hash(password, 10); // Encriptamos la contraseña
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const saldoInicial = 100000000;
   const query = `
-    INSERT INTO usuarios (cedula, nombre_usuario, email, password_hash, estado_cuenta) 
-    VALUES ($1, $2, $3, $4, 'pendiente') 
+    INSERT INTO usuarios (cedula, nombre_usuario, email, password_hash, saldo, estado_cuenta)
+    VALUES ($1, $2, $3, $4, $5, 'pendiente')
     RETURNING usuario_id, cedula, nombre_usuario, email, foto_usuario, fecha_registro, saldo, estado_cuenta
   `;
-  const values = [cedula, nombre_usuario, email, hashedPassword];
+  const values = [cedula, nombre_usuario, email, hashedPassword, saldoInicial];
 
   try {
     const result = await pool.query(query, values);
-    return result.rows[0]; // Retornamos el usuario registrado
+    return result.rows[0];
   } catch (error) {
     throw new Error('Error al crear usuario: ' + error.message);
   }
