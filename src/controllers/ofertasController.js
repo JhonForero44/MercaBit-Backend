@@ -14,15 +14,15 @@ const { actualizarSubastaDespuesDeOferta, obtenerSubastaPorId } = require('../mo
 
 async function crearNuevaOferta(req, res) {
   const { subasta_id, cantidad } = req.body;
-  const usuario_id = req.user.id;
+  const usuario_id = req.user?.id;
 
-/*
-  console.log('Cuerpo de la solicitud:', req.body);  // Imprimir el cuerpo de la solicitud
-  console.log('Usuario:', req.user);  // Imprimir el usuario
-  console.log('subasta_id:', subasta_id);
-  console.log('cantidad:', cantidad);
-  console.log('usuario_id:', usuario_id);
-*/
+  /*
+    console.log('Cuerpo de la solicitud:', req.body);  // Imprimir el cuerpo de la solicitud
+    console.log('Usuario:', req.user);  // Imprimir el usuario
+    console.log('subasta_id:', subasta_id);
+    console.log('cantidad:', cantidad);
+    console.log('usuario_id:', usuario_id);
+  */
 
   if (!subasta_id || !usuario_id || !cantidad) {
     return res.status(400).json({ message: 'Faltan datos requeridos' });
@@ -53,7 +53,7 @@ async function crearNuevaOferta(req, res) {
     await crearNotificacion(vendedor_id, subasta_id, null, mensajeVendedor, 'nueva_oferta');
 
     // 4. Notificar al usuario cuya oferta fue superada, si existe
-    if (ofertaActual.usuario_id && ofertaActual.usuario_id !== usuario_id) {
+    if (ofertaActual && ofertaActual.usuario_id && ofertaActual.usuario_id !== usuario_id) {
       const mensajeOfertaSuperada = `Tu oferta de $${montoActual} en la subasta "${subasta.titulo}" ha sido superada por una nueva oferta de $${montoNuevo}.`;
       await crearNotificacion(ofertaActual.usuario_id, subasta_id, ofertaActual.oferta_id, mensajeOfertaSuperada, 'oferta_superada');
     }
@@ -61,7 +61,7 @@ async function crearNuevaOferta(req, res) {
     res.status(201).json({ message: 'Oferta creada exitosamente', oferta: nuevaOferta });
 
   } catch (error) {
-    console.error('Error al crear oferta:', error); 
+    console.error('Error al crear oferta:', error);
     res.status(500).json({ message: 'Error al crear oferta', error: error.message });
   }
 }
