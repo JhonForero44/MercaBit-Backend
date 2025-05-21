@@ -1,4 +1,4 @@
-const { createUser, getUserByEmail } = require('../models/userModels');
+const { createUser, getUserByEmail, updateUserPassword } = require('../models/userModels');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const enviarCorreo = require('../utils/mailer');
@@ -149,8 +149,7 @@ const requestPasswordReset = async (req, res) => {
   }
 };
 
-// Restablecer la contraseña
-const resetPassword = async (req, res) => {
+const resetPassword = async (req, res) => { 
   const { token, newPassword } = req.body;
 
   if (!token || !newPassword) {
@@ -170,7 +169,7 @@ const resetPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Actualizar la contraseña en la base de datos
-    await updateUserPassword(email, hashedPassword);
+    await updateUserPassword(email, hashedPassword);  // Llamar a la función definida
 
     res.status(200).json({
       message: 'Contraseña actualizada con éxito',
